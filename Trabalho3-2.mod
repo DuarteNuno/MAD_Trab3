@@ -1,33 +1,45 @@
 set TYPE;
 set OPE;
 
-param z {TYPE} >=0;
-param ope {OPE, TYPE} >= 0;
+param z {TYPE};
+param ope {OPE, TYPE};
 param number_of_weeks;
 param price_stock;
 param price_delay;
 param setup_operation;
-param orders {w in 1..number_of_weeks, TYPE} >= 0;
+param orders {w in 1..number_of_weeks, TYPE};
 
 var delay {w in 0..number_of_weeks, TYPE} >= 0;
 var s {w in 0..number_of_weeks, TYPE} >= 0;
 var q {w in 1..number_of_weeks, TYPE} >= 0;
-var p {w in 1..number_of_weeks, TYPE} >= 0;
 var setupLine {w in 1..number_of_weeks, TYPE};
-var pc {OPE, w in 1..number_of_weeks, TYPE} >= 0, <=1;
 var productionLine {w in 1..number_of_weeks, TYPE} binary;
 
 minimize cost:
 sum {w in 1..number_of_weeks, t in TYPE} (price_stock*s[w, t] + price_delay*delay[w, t] + setup_operation*productionLine[w,t]);
 
 subject to
-S0 {t in TYPE}: s[0,t] = 0;
-S52 {t in TYPE}: s[52,t] = 0;
-D0 {t in TYPE}: delay[0,t] = 0;
-D52 {t in TYPE}: delay[52,t] = 0;
+s0 {t in TYPE}: s[0,t] = 0;
+s52 {t in TYPE}: s[52,t] = 0;
+d0 {t in TYPE}: delay[0,t] = 0;
+d52 {t in TYPE}: delay[52,t] = 0;
+
+s1 {t in TYPE}: 
+sum {w in 1..number_of_weeks} q[w,t] = sum {w in 1..number_of_weeks} orders[w,t];
+#garantir que o q foi produzido é o q foi pedido
+
+s2 {t in TYPE}: 
+sum {w in 1..number_of_weeks} ((q[w,t]*z[t]) - orders[w,t]) >=0;
+# garantir que a quantidade por semana é maior que o pedido 
 
 SetupLines {w in 1..number_of_weeks}:
-productionLine [w, 'R'] + productionLine [w, 'C'] + productionLine [w, 'I'] <= 2;
+sum {t in TYPE} productionLine[w,t] <= 2;
+
+SetupLines1 {w in 1..number_of_weeks}:
+productionLine [w, 'R'] + productionLine [w, 'I'] <= 1;
+
+SetupLines2 {w in 2..number_of_weeks}:
+productionLine [w-1, 'R'] + productionLine [w, 'I'] <= 1;
 
 StoreAndDelay {w in 1..number_of_weeks,t in TYPE}:
 s[w, t] + orders[w, t] + delay[w-1, t] = q[w, t] + s[w-1, t] + delay[w, t];
@@ -37,9 +49,3 @@ sum {t in TYPE} q[w,t]/ope[o,t] <= 1;
 
 ProdFinal {t in TYPE, w in 1..number_of_weeks}:
 q[w,t] <= z[t]*productionLine[w,t];
-
-SetupLines1 {w in 1..number_of_weeks}:
-productionLine [w, 'R'] + productionLine [w, 'I'] <= 1;
-
-SetupLines2 {w in 2..number_of_weeks}:
-productionLine [w-1, 'R'] + productionLine [w, 'I'] <= 1;

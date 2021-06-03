@@ -6,7 +6,7 @@ ampl = AMPL()
 ampl.read('Trabalho3-2.mod')
 ampl.readData('Trabalho3.dat')
 
-print(ampl.importGurobiSolution("Trabalho3-2.mod"))
+ampl.setOption('solver','gurobi')
 
 # Solve
 ampl.solve()
