@@ -1,11 +1,12 @@
-set Types:=  R  C  I ;
-set Op := Cleaning Cooking Packing;
-
+set TYPE := R C I;
+set OPE := Cleaning Cooking Packing;
 
 param number_of_weeks := 52;
-param price_stock_earth := 1;
+param price_stock := 1;
+param price_delay := 2;
+param setup_operation := 5000;
 
-param T:    R      C      I   :=
+param orders:    R      C      I   :=
          1     108     59     16
          2     106     55     21
          3     109     59     16
@@ -60,10 +61,11 @@ param T:    R      C      I   :=
         52     107     52     17
 ;
 
-param production_capacity:
-  R    C     I  :=
+param ope:   R    C     I  :=
   Cleaning  1000 1535 1750
   Cooking   1850 850  1200
   Packing   750  1500 2000;
+
+param z:= R 750 C 850 I 1200;
 
 end;
